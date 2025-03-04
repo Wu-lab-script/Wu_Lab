@@ -1,4 +1,3 @@
-setwd("/fs/ess/PAS2177/Jianying/Fianal/Chinese/Result")
 
 library(Seurat)
 library(SeuratObject)
