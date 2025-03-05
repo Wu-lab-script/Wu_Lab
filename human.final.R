@@ -1,3 +1,6 @@
+getwd()
+
+setwd("/home/OSUMC.EDU/li176/work/Jianying/Jocye")
 
 library(Seurat)
 library(SeuratObject)
@@ -108,11 +111,11 @@ objeight<-FindVariableFeatures(objeight,selection.method = "vst",nfeatures = 200
 
 obj.list<-list(objone, objtwo, objthree,objfour,objfive,objsix,objseven,objeight)
 Tdat <-
-  RunHarmony(Tdat, "obj.list", plot_convergence = FALSE)
+    RunHarmony(Tdat, "obj.list", plot_convergence = FALSE)
 Tdat <-
-  RunUMAP(Tdat, reduction = "harmony", dims = 1:20)
+    RunUMAP(Tdat, reduction = "harmony", dims = 1:20)
 Tdat <-
-  FindNeighbors(Tdat, reduction = "harmony", dims = 1:20)
+    FindNeighbors(Tdat, reduction = "harmony", dims = 1:20)
 Tdat <- FindClusters(Tdat, resolution = 0.2)
 
 
@@ -134,8 +137,8 @@ table(Tdat$Condition)
 condition.list <- SplitObject(Tdat, split.by = "Condition")
 #vnormalize and identify variable features for each dataset independently
 condition.list<- lapply(X = condition.list, FUN = function(x) {
-  x <- NormalizeData(x)
-  x <- FindVariableFeatures(x, selection.method = "vst", nfeatures = 2000)
+    x <- NormalizeData(x)
+    x <- FindVariableFeatures(x, selection.method = "vst", nfeatures = 2000)
 })
 
 # select features that are repeatedly variable across datasets for integration
@@ -159,32 +162,32 @@ DefaultAssay(Tdat) <- "RNA"
 selected_mito <- WhichCells(Tdat, expression = percent_mito < 0.2)
 Tdat <- ScaleData(Tdat, verbose = FALSE)
 Tdat <-
-  FindVariableFeatures(Tdat,
-                       selection.method = "vst",
-                       nfeatures = 2000)
+    FindVariableFeatures(Tdat,
+                         selection.method = "vst",
+                         nfeatures = 2000)
 Tdat <-RunPCA(
-  Tdat,
-  pc.genes = Tdat@var.genes,
-  npcs = 20,
-  verbose = FALSE
+    Tdat,
+    pc.genes = Tdat@var.genes,
+    npcs = 20,
+    verbose = FALSE
 )
 Tdat <-
-  RunHarmony(Tdat, "Condition", plot_convergence = FALSE)
+    RunHarmony(Tdat, "Condition", plot_convergence = FALSE)
 Tdat <-
-  RunUMAP(Tdat, reduction = "harmony", dims = 1:20)
+    RunUMAP(Tdat, reduction = "harmony", dims = 1:20)
 Tdat <-
-  FindNeighbors(Tdat, reduction = "harmony", dims = 1:20)
+    FindNeighbors(Tdat, reduction = "harmony", dims = 1:20)
 Tdat <- FindClusters(Tdat, resolution = 0.2)
 
 DefaultAssay(Tdat) <- "RNA"
 Idents(Tdat) <- Tdat$seurat_clusters
 
 DimPlot(
-  Tdat,
-  reduction = "umap",
-  group.by = "seurat_clusters",
-  split.by = "orig.ident",
-  label = T
+    Tdat,
+    reduction = "umap",
+    group.by = "seurat_clusters",
+    split.by = "orig.ident",
+    label = T
 )
 
 ####################################################################
@@ -194,101 +197,14 @@ DimPlot(
 
 
 
-genenew.list<-c("itgb7", "itga4", "ccr9", "rorc", "rora",  "S1PR1", "cxcr4", "bub1", "cdc20", "cdc6", "cdk1", "ttk",  "tcf7",  "prdm1", "pdcd1", "SH2D1A", "SLAMF1", "Ly9", "CD84", "SLAMF6")
-genenew.list <- toupper(genenew.list)
-genenew.list
-
-Idents(Tdat) <- Tdat$Condition
-DefaultAssay(Tdat) <- "RNA"
-
-DotPlot(Tdat, features = genenew.list, dot.scale = 8, split.by = "Condition") +
-  RotatedAxis()
 # relabeld cluster 
 # Rename Cluster
 
 
-
-
-###########################
-FeaturePlot(Tdat, features = c("CD3D", "SELL", "BCL6","CD4","CD8A"), min.cutoff = "q9")
-Idents(Tdat)<-"seurat_clusters"
-dat.CD4 <- subset(Tdat,idents=c("0","2","4","11","5"))
-table(dat.CD4$Condition)
-
-
-
-pc <- WhichCells(dat.CD4, expression = BCL6 >0 & CD3D>0&SELL>0)
-dat.CD4$BCL6_exp<- ifelse(colnames(dat.CD4) %in% pc, "BCL6+", "BCL6-")
-Idents(dat.CD4) <- "BCL6_exp"
-
-Condition_BCL6<- paste(dat.CD4$Condition, "_",dat.CD4$BCL6_exp)
-names(Condition_BCL6) <- colnames(x = dat.CD4)
-dat.CD4 <- AddMetaData(
-  object = dat.CD4,
-  metadata = Condition_BCL6,
-  col.name = 'Condition_BCL6')
-
-Idents(dat.CD4)<-"Condition_BCL6"
-table(dat.CD4$Condition_BCL6)
-
-Tdat_BCL6<-subset(dat.CD4, idents = c("HC _ BCL6+", "RA _ BCL6+"))
-
-genenew.list<-c("ITGB7","RORC","ICOS","MAF","SH2D1A","SLAMF1","LY9","CD84","SLAMF6","IL2RA","IL2","IL21")
-
-png(filename = "Human.png", width = 9, height = 6, res = 300, units = "in")
-DotPlot(Tdat_BCL6,features = genenew.list, group.by="Condition")+theme(axis.text.x = element_text(angle = 90,vjust = 0.5,hjust = 1))
-dev.off()
-
-#VIOLIN PLOT
-PPTfhhuman <- fread("Th17derTfh_signgenesPP.csv")
-PPTfhhuman <- PPTfhhuman[,2]
-PPTfhhuman
-sTfh <- fread("Th17derTfh_signgenesSpleen.csv")
-sTfh <- sTfh[,2]
-sTfh
-
-
-DefaultAssay(object = dat.CD4) <- "RNA"
-dat.CD4<-AddModuleScore(object = dat.CD4, features = PPTfhhuman, name = "PPTfhhuman_score")
-head(dat.CD4)
-viodat<-data.frame(Condition=dat.CD4$Condition, PPTfhhuman_score= dat.CD4$PPTfhhuman_score1)
-fun_mean<-function(x){return(data.frame(y=mean(x),label=round(mean(x,na.rm=T),3)))}
-
-compare_means(PPTfhhuman_score~Condition, data = viodat)
-my_comparisons<-list(c("HC _ CD4-", "HC _ CD4+"),c("HC _ CD4-", "RA _ CD4-"),c("HC _ CD4-", "RA _ CD4+"),c("RA _ CD4+", "HC _ CD4+" ), c("RA _ CD4-", "HC _ CD4+"),c("RA _ CD4-", "RA _ CD4+"))
-
-png(filename = "PP signature gene in Total Tfh cell.png", width = 9, height = 6, res = 300, units = "in")
-ggplot(viodat, aes(x=Condition,y=PPTfhhuman_score, fill=Condition))+
-  geom_violin()+
-  scale_fill_manual(values = c("#E7B800","#52854C","#FC4E07","#0072B2"))+
-  geom_boxplot(width=0.1,fill="white")+
-  stat_compare_means(comparisons = my_comparisons,label="p.signif")+
-  stat_compare_means(label.y = 3.5, label.x = 1.5)+stat_summary(fun.data = fun_mean,geom = "text",vjust=-0.1)+
-  theme_classic()+labs(title = "PP signature gene in Total Tfh cell")
-dev.off()
-
-
-DefaultAssay(dat.CD4) <- "RNA"
-dat.CD4<-AddModuleScore(object = dat.CD4, features = sTfh, name = "sTfh_score")
-head(dat.CD4)
-viodat1<-data.frame(Condition=dat.CD4$Condition, sTfh_score= dat.CD4$sTfh_score1)
-fun_mean<-function(x){return(data.frame(y=mean(x),label=round(mean(x,na.rm=T),3)))}
-
-compare_means(sTfh_score~Condition, data = viodat1)
-my_comparisons<-list(c("HC _ CD4-", "HC _ CD4+"),c("HC _ CD4-", "RA _ CD4-"),c("HC _ CD4-", "RA _ CD4+"),c("RA _ CD4+", "HC _ CD4+" ), c("RA _ CD4-", "HC _ CD4+"),c("RA _ CD4-", "RA _ CD4+"))
-
-
-png(filename = "spleen signature gene in Total Tfh cell.png", width = 9, height = 6, res = 300, units = "in")
-ggplot(viodat1, aes(x=Condition,y=sTfh_score, fill=Condition))+
-  geom_violin()+
-  scale_fill_manual(values = c("#E7B800","#52854C","#FC4E07","#0072B2"))+
-  geom_boxplot(width=0.1,fill="white")+
-  stat_compare_means(comparisons = my_comparisons,label="p.signif")+
-  stat_compare_means(label.y = 0.7, label.x = 1.5)+stat_summary(fun.data = fun_mean,geom = "text",vjust=-0.1)+
-  theme_classic()+labs(title = "spleen signature gene in Total Tfh cell")
-dev.off()
 #############################################
 # create Tfh name
+save(dat.Tfh,file = "dat.Tfh.RData")
+save(Tdat,file = "Tdat.RData")
 DefaultAssay(Tdat) <- "RNA"
 pc <- WhichCells(Tdat, expression =BCL6>0 & CD4> 0) #& BCL6>0)
 #pc <- WhichCells(Tdat, expression = CXCR5 >0 & PDCD1>0)
@@ -298,9 +214,9 @@ Idents(Tdat) <- "Tfh"
 Condition_Tfh<- paste(Tdat$Condition, "_",Tdat$Tfh)
 names(Condition_Tfh) <- colnames(x = Tdat)
 Tdat <- AddMetaData(
-  object = Tdat,
-  metadata = Condition_Tfh,
-  col.name = 'Condition_Tfh')
+    object = Tdat,
+    metadata = Condition_Tfh,
+    col.name = 'Condition_Tfh')
 
 Idents(Tdat)<-"Condition_Tfh"
 table(Tdat$Condition_Tfh)
@@ -315,112 +231,73 @@ DotPlot(dat.Tfh,features = PP4, group.by="Condition")+theme(axis.text.x = elemen
 dev.off()
 ############################ load the data
 
-PP1 <- fread("PP1-2.csv")
-PP1<- PP1[,5]
-PP1
-PP2 <- fread("PP2-2.csv")
-PP2<- PP2[,4]
-PP2
-PP3 <- fread("PP3-1.csv")
-PP3<- PP3[,3]
-PP3
 
 PP4 <- fread("Th17derTfh_signgenesPP.csv")
 PP4<- PP4[,2]
 PP4
 
-SP1 <- fread("SP1-2.csv")
-SP1<- SP1[,3]
-PP1
-SP2 <- fread("SP2-1.csv")
-SP2<- SP2[,3]
-SP2
-SP3 <- fread("SP3-1.csv")
-SP3<- SP3[,3]
-SP3
+
 
 SP4 <- fread("Th17derTfh_signgenesSpleen.csv")
 SP4<- SP4[,2]
 SP4
 ## USE The PP1 and SP1#################################
 DefaultAssay(object = dat.Tfh) <- "RNA"
-dat.Tfh<-AddModuleScore(object = dat.Tfh, features = PP2, name = "PPTfhhuman_score")
+dat.Tfh<-AddModuleScore(object = dat.Tfh, features = PP4, name = "PPTfhhuman_score")
 head(dat.Tfh)
 viodat<-data.frame(Condition=dat.Tfh$Condition, PPTfhhuman_score= dat.Tfh$PPTfhhuman_score1)
 fun_mean<-function(x){return(data.frame(y=mean(x),label=round(mean(x,na.rm=T),3)))}
 
 compare_means(PPTfhhuman_score~Condition, data = viodat)
+
 # my_comparisons<-list(c("HC _ CD4-", "HC _ CD4+"),c("HC _ CD4-", "RA _ CD4-"),c("HC _ CD4-", "RA _ CD4+"),c("RA _ CD4+", "HC _ CD4+" ), c("RA _ CD4-", "HC _ CD4+"),c("RA _ CD4-", "RA _ CD4+"))
 
-pdf(filename = "PP-2 signature gene in CD4+BCL6+ Tfh cell.pdf", width = 4, height = 4, units = "in")
+#pdf(filename = "PP-2 signature gene in CD4+BCL6+ Tfh cell.pdf", width = 4, height = 4, units = "in")
+table(viodat$Condition)
+table(viodat$PPTfhhuman_score)
 
 p2 <- ggplot(viodat, aes(x=Condition,y=PPTfhhuman_score, fill=Condition))+
-  geom_violin()+
-  scale_fill_manual(values = c("#56B4E9","#FF9999"))+
-  geom_boxplot(width=0.1,fill="white")+
-  stat_compare_means(comparisons = my_comparisons,label="p.signif")+
-  stat_compare_means(label.y = 3.0, label.x = 1.5)+
-  ylim(-1, 3)+
-  stat_summary(fun.data = fun_mean,geom = "text",vjust=-0.1)+
-  theme_classic()+labs(title = "PP-2 signature gene in CD4+BCL6+ Tfh cell")+theme(axis.text = element_text(size = 25))+theme(axis.title = element_text(size = 25))+
-  theme(legend.text = element_text(size=25)) +theme(legend.title = element_text(size=25))
+    geom_violin()+
+    scale_fill_manual(values = c("#56B4E9","#FF9999"))+
+    geom_boxplot(width=0.1,fill="white")+
+    stat_compare_means(comparisons = my_comparisons,label="p.signif")+
+    stat_compare_means(label.y = 3.0, label.x = 1.5)+
+    ylim(-1, 3)+
+    stat_summary(fun.data = fun_mean,geom = "text",vjust=-0.1)+
+    theme_classic()+labs(title = "PP-2 signature gene in CD4+BCL6+ Tfh cell")+theme(axis.text = element_text(size = 25))+theme(axis.title = element_text(size = 25))+
+    theme(legend.text = element_text(size=25)) +theme(legend.title = element_text(size=25))
 p2
-dev.off()
+#dev.off()
 
 
 DefaultAssay(dat.Tfh) <- "RNA"
-dat.Tfh<-AddModuleScore(object = dat.Tfh, features = SP2, name = "sTfh_score")
+dat.Tfh<-AddModuleScore(object = dat.Tfh, features = SP4, name = "sTfh_score")
 head(dat.Tfh)
-viodat1<-data.frame(Condition=dat.Tfh$Condition, sTfh_score= dat.Tfh$sTfh_score1)
+viodat3<-data.frame(Condition=dat.Tfh$Condition, sTfh_score= dat.Tfh$sTfh_score1)
 fun_mean<-function(x){return(data.frame(y=mean(x),label=round(mean(x,na.rm=T),3)))}
 
 compare_means(sTfh_score~Condition, data = viodat1)
 #my_comparisons<-list(c("HC _ CD4-", "HC _ CD4+"),c("HC _ CD4-", "RA _ CD4-"),c("HC _ CD4-", "RA _ CD4+"),c("RA _ CD4+", "HC _ CD4+" ), c("RA _ CD4-", "HC _ CD4+"),c("RA _ CD4-", "RA _ CD4+"))
 
 
-pdf(filename = "spleen-2 signature gene in CD4+BCL6+  Tfh cell.pdf", width = 6, height = 8, units = "in")
-p1 <- ggplot(viodat1, aes(x=Condition,y=sTfh_score, fill=Condition))+
-  geom_violin()+
-  scale_fill_manual(values = c("#56B4E9","#FF9999"))+
-  geom_boxplot(width=0.1,fill="white")+
-  stat_compare_means(comparisons = my_comparisons,label="p.signif")+
-  stat_compare_means(label.y = 3.0, label.x = 1.5)+
-  ylim(-1, 3.0)+
-  stat_summary(fun.data = fun_mean,geom = "text",vjust=0.5)+
-  theme_classic()+
-labs(title = "spleen-2 signature gene in  CD4+BCL6+ Tfh cell")+theme(axis.text = element_text(size = 25))+theme(axis.title = element_text(size = 25))+
-  theme(legend.text = element_text(size=25))+theme(legend.title = element_text(size=25))  
-p1
-dev.off() 
-#####################################################
-pdf(filename = "spleen and PP signature gene in CD4+BCL6+  Tfh cell.pdf", width = 6, height = 8, units = "in")
-p1+p2
-dev.off()
-
-##total spleen
-SP17 <- fread("Th17_control.csv")
-SP17<- SP17[,2]
-SP17
-DefaultAssay(dat.Tfh) <- "RNA"
-dat.Tfh<-AddModuleScore(object = dat.Tfh, features = SP17, name = "sTfh_score")
-head(dat.Tfh)
-viodat3<-data.frame(Condition=dat.Tfh$Condition, sTfh_score= dat.Tfh$sTfh_score1)
-fun_mean<-function(x){return(data.frame(y=mean(x),label=round(mean(x,na.rm=T),3)))}
-
-compare_means(sTfh_score~Condition, data = viodat3)
-
-
-png(filename = "Human Tfh17 control signature gene in Total Tfh cell.png", width = 9, height = 6, res = 300, units = "in")
+#pdf(filename = "spleen-2 signature gene in CD4+BCL6+  Tfh cell.pdf", width = 6, height = 8, units = "in")
 p1 <- ggplot(viodat3, aes(x=Condition,y=sTfh_score, fill=Condition))+
-  geom_violin()+
-  scale_fill_manual(values = c("#56B4E9","#FF9999"))+
-  geom_boxplot(width=0.1,fill="white")+
-  stat_compare_means(comparisons = my_comparisons,label="p.signif")+
-  stat_compare_means(label.y = 3.0, label.x = 1.5)+
-  ylim(-1, 3.0)+
-  stat_summary(fun.data = fun_mean,geom = "text",vjust=0.5)+
-  theme_classic()+
-  labs(title = "Human Tfh17 control signature gene in Total Tfh cell.png")+theme(axis.text = element_text(size = 25))+theme(axis.title = element_text(size = 25))+
-  theme(legend.text = element_text(size=25))+theme(legend.title = element_text(size=25))  
+    geom_violin()+
+    scale_fill_manual(values = c("#56B4E9","#FF9999"))+
+    geom_boxplot(width=0.1,fill="white")+
+    stat_compare_means(comparisons = my_comparisons,label="p.signif")+
+    stat_compare_means(label.y = 3.0, label.x = 1.5)+
+    ylim(-1, 3.0)+
+    stat_summary(fun.data = fun_mean,geom = "text",vjust=0.5)+
+    theme_classic()+
+    labs(title = "spleen-2 signature gene in  CD4+BCL6+ Tfh cell")+theme(axis.text = element_text(size = 25))+theme(axis.title = element_text(size = 25))+
+    theme(legend.text = element_text(size=25))+theme(legend.title = element_text(size=25))  
 p1
-dev.off()
+#dev.off() 
+#####################################################
+#pdf(filename = "spleen and PP signature gene in CD4+BCL6+  Tfh cell.pdf", width = 6, height = 8, units = "in")
+p1+p2
+#dev.off()
+
+#
+
